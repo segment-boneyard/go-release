@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"path/filepath"
 
 	"golang.org/x/oauth2"
 
@@ -86,7 +87,9 @@ func main() {
 
 		log.Println("Uploading asset", asset)
 
-		_, _, err = client.Repositories.UploadReleaseAsset(org, repo, *release.ID, &github.UploadOptions{asset}, file)
+		_, name := filepath.Split(asset)
+
+		_, _, err = client.Repositories.UploadReleaseAsset(org, repo, *release.ID, &github.UploadOptions{name}, file)
 		check(err)
 	}
 }
