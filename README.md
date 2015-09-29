@@ -1,6 +1,6 @@
 # go-release
 
-Script that will create and upload assets for a Github release for a given tag.
+Script that will create a Github release and upload assets for a given tag.
 
 # Installation
 Download the [binaries](https://github.com/segmentio/go-release/releases) or `go get github.com/segmentio/go-release`
