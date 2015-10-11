@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
 
 	"golang.org/x/oauth2"
 
@@ -101,13 +102,15 @@ func main() {
 
 			_, name := filepath.Split(asset)
 
+			start := time.Now()
 			_, _, err = client.Repositories.UploadReleaseAsset(org, repo, *release.ID, &github.UploadOptions{name}, file)
 			if err != nil {
 				log.Println("[error] could not upload", asset, err)
 				return
 			}
 
-			log.Println("Uploaded asset", asset)
+			elapsed := time.Since(start)
+			log.Printf("Uploaded asset %s in %s\n", asset, elapsed)
 		}(asset)
 	}
 
