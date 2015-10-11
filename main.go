@@ -16,7 +16,7 @@ const (
 	usage = `release.
 
 Usage:
-  release <org> <repo> [--assets=<assets>...]
+  release <org> <repo> <assets>...
           [--tag <tag>]
           [--token <token>]
           [--name <name>]
@@ -46,7 +46,7 @@ func main() {
 	// Grab inputs.
 	org := args["<org>"].(string)
 	repo := args["<repo>"].(string)
-	assets := args["--assets"].([]string)
+	assets := args["<assets>"].([]string)
 	token := args["--token"].(string)
 	if token == "" {
 		token = os.Getenv("GITHUB_TOKEN")
