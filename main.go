@@ -42,7 +42,9 @@ Options:
 
 func main() {
 	args, err := docopt.Parse(usage, nil, true, version, false)
-	check(err)
+	if err != nil {
+		panic(err)
+	}
 
 	// Grab inputs.
 	org := args["<org>"].(string)
@@ -78,7 +80,9 @@ func main() {
 		TagName:    &tag,
 		Body:       &body,
 	})
-	check(err)
+	if err != nil {
+		panic(err)
+	}
 
 	log.Println("Created release", *release.ID)
 
@@ -88,24 +92,26 @@ func main() {
 		go func(asset string) {
 			defer wg.Done()
 			file, err := os.Open(asset)
-			check(err)
+			if err != nil {
+				log.Println("[error] could not open", asset, err)
+				return
+			}
 
 			log.Println("Uploading asset", asset)
 
 			_, name := filepath.Split(asset)
 
 			_, _, err = client.Repositories.UploadReleaseAsset(org, repo, *release.ID, &github.UploadOptions{name}, file)
-			check(err)
+			if err != nil {
+				log.Println("[error] could not upload", asset, err)
+				return
+			}
+
+			log.Println("Uploaded asset", asset)
 		}(asset)
 	}
 
 	wg.Wait()
-}
-
-func check(err error) {
-	if err != nil {
-		log.Fatalln("error:", err)
-	}
 }
 
 func newGithub(token string) *github.Client {
@@ -121,11 +127,15 @@ func latestTag(client *github.Client, org, name string) string {
 	opt := &github.ListOptions{PerPage: 100}
 
 	latest, err := semver.Make("0.0.1")
-	check(err)
+	if err != nil {
+		panic(err)
+	}
 
 	for {
 		newTags, resp, err := client.Repositories.ListTags(org, name, opt)
-		check(err)
+		if err != nil {
+			panic(err)
+		}
 
 		for _, tag := range newTags {
 			version, err := semver.Make(*tag.Name)
