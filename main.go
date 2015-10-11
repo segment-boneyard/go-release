@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"golang.org/x/oauth2"
 
@@ -81,17 +82,24 @@ func main() {
 
 	log.Println("Created release", *release.ID)
 
+	var wg sync.WaitGroup
 	for _, asset := range assets {
-		file, err := os.Open(asset)
-		check(err)
+		wg.Add(1)
+		go func(asset string) {
+			defer wg.Done()
+			file, err := os.Open(asset)
+			check(err)
 
-		log.Println("Uploading asset", asset)
+			log.Println("Uploading asset", asset)
 
-		_, name := filepath.Split(asset)
+			_, name := filepath.Split(asset)
 
-		_, _, err = client.Repositories.UploadReleaseAsset(org, repo, *release.ID, &github.UploadOptions{name}, file)
-		check(err)
+			_, _, err = client.Repositories.UploadReleaseAsset(org, repo, *release.ID, &github.UploadOptions{name}, file)
+			check(err)
+		}(asset)
 	}
+
+	wg.Wait()
 }
 
 func check(err error) {
